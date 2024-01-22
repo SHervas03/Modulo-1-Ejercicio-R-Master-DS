@@ -1,0 +1,164 @@
+---
+title: "Ejercicios R"
+autor: Sergio Hervás Aragón
+---
+
+#### **1. Crea la siguiente matriz de 4x5.**
+Dada a la resolución del primer apartado planteo estas dos metodologias:
+
+- Metodología 1:
+```{r}
+matriz.principal <- matrix(c(1:20), nrow=4, ncol=5, byrow = T)
+A <- matriz.principal
+A
+```
+- Metodología 2:
+```{r}
+matriz.principal <- matrix(c(1:20), nrow=5, ncol=4)
+A <- t(matriz.principal)
+A
+```
+
+#### **2. Extraer los elementos A[4, 3]; A[3, 4]; A[2, 5] para ello, utilizando una matriz de índices.**
+```{r}
+# Creacion de una matri la cual esta ordenada en funcion los parametros que queremos extraer (A[4, 3]; A[3, 4]; A[2, 5])
+indices.matriz <- matrix(c(4,3,3,4,2,5), ncol = 2, byrow = T)
+
+# A[4,3]
+A[indices.matriz[1,1],indices.matriz[1,2]]
+# A[3,4]
+A[indices.matriz[2,1],indices.matriz[2,2]]
+# A[2,5]
+A[indices.matriz[3,1],indices.matriz[3,2]]
+print("------")
+for (nX in 1:nrow(indices.matriz)){
+    print(A[indices.matriz[nX,1],indices.matriz[nX,2]])
+}
+print("------")
+A[4,3]
+A[3,4]
+A[2,5]
+```
+
+#### **3. Reemplazar los elementos indexados por 0.**
+```{r}
+# Creacion de una matriz la cual esta ordenada en funcion los parametros que queremos extraer (A[4, 3]; A[3, 4]; A[2, 5])
+indices.matriz <- matrix(c(4,3,3,4,2,5), ncol = 2, byrow = T)
+
+# Sustituimos los valores de la matriz indicados por 0
+A[indices.matriz[1,1],indices.matriz[1,2]] <- 0
+A[indices.matriz[2,1],indices.matriz[2,2]] <- 0
+A[indices.matriz[3,1],indices.matriz[3,2]] <- 0
+
+A
+```
+
+#### **4. Crear la matriz de identidad de 5x5.**
+```{r}
+# Creacion de una matriz base con nulos para tener una base
+matriz.identidad <- matrix(NA, nrow = 5, ncol = 5, byrow = T)
+
+# Bucle que va de 1 a el numero maximo de filas, por cada vuelta, con la funcion diag, donde item es un escalar (vector de longitud uno) y el único argumento, devuelve una matriz de identidad cuadrada de tamaño dada por el escalar.
+for (item in 1:nrow(matriz.identidad)){
+  matriz.identidad <- diag(item)
+}
+
+matriz.identidad
+
+
+```
+#### **5. Convertir la matriz A anterior (la resultante del apartado 3) en una matriz cuadrada B añadiendo al final una fila de unos.**
+```{r}
+# Creamos una copia de A llamada B, para crear la matrix cuadrada de esta (B)
+B <- A
+# Hacemos un bucle de 1 al numero de maximo de columnas que tenga la matrix A
+# rep(1, item) <- rep se encarga de `repetir` una serie de requisitos, en este caso, 1, el valor que tiene que repetir, item (5 o ncol(A)), el numero de veces que lo tiene que repetir
+# matrix <- la funcion rep nos devuelve un `numeric` por lo que lo parseamos a una matriz
+# t() <- funcion para realizar la traspuesta de una matriz, ya que la funcion de matrix crea los elementos por columnas necesitandolo por filas, siendo asi ya un class("matrix" "array)
+for (item in 1:ncol(A)){
+ nueva.fila <- t(matrix(rep(1, item)))
+}
+# rbind <- funcion que se utiliza para a una matriz padre, en este caso con rbind, añadir filas
+B <- rbind(B, nueva.fila)
+# B <- rbind(A, c(1,1,1,1,1))
+B
+```
+#### **6. Calcular la inversa de la matriz B.**
+```{r}
+# solve <- inversa de una matriz
+B.inversa <- solve(B)
+B.inversa
+```
+#### **7. Multiplicar B por su inversa B-1.**
+```{r}
+# %*% <- Realiza el producto de matrices estándar. Las matrices deben tener dimensiones compatibles para realizar la operación. Es decir, el número de columnas de la primera matriz debe ser igual al número de filas de la segunda matriz.
+resultado <- B %*% B.inversa
+resultado
+```
+##### **8. Comprobar si el resultado es exactamente la matriz de identidad I.**
+
+*Matriz Identidad = matriz cuadrada en la que todos los elementos de la diagonal principal son iguales a 1 y todos los demás elementos son iguales a 0*
+
+- Metodología 1: 
+```{r}
+# Teniendo una matris de identidad (matriz.identidad), la comparamos con el resultado obtenido de la multiplicacion de B por su inversa de B-1
+sonDistintos <- FALSE
+# Recorreremos ambas matrices valor a valor verificando que sean iguales, en caso de que se detecte un valor que no sea igual a otro, haremos saltar la variable 'sonDistintas' que es la que nos indica que los valores [x,y] de ambas matrices que se estan comparando no son iguales
+while (!sonDistintos) {
+  for (Nfilas in 1:nrow(matriz.identidad)) {
+    for (Ncolumnas in 1:ncol(matriz.identidad)) {
+      if (matriz.identidad[Nfilas, Ncolumnas] != resultado[Nfilas, Ncolumnas]) {
+        sonDistintos <- TRUE
+        break
+      }
+    }
+  }
+}
+
+if (sonDistintos) {
+  print('Las dos matrices no son iguales')
+} else {
+  print('Las dos matrices son iguales')
+}
+
+```
+- Metodología 2:
+```{r}
+# Funcion la cual comprueba que dos objetos son exactamente iguales
+sonIguales <- identical(matriz.identidad, resultado)
+sonIguales
+```
+#### **9. En caso contrario, calcular el error de la operación entendiendo como error la siguiente fórmula (donde N es el número de elementos de la matriz B).**
+```{r}
+# De dentro a afuera:
+# Multiplicacion de B por su inversa B-1 (B*B-1)
+# resultado
+# Restar multiplicacion a matriz identidad I
+resultado.resta <- resultado - matriz.identidad
+# Obtener el valor absoluto |(B*B-1 - I)(i,j)|
+valor.absoluto <- abs(resultado.resta)
+# Realizar el sumatorio de todos los elementos de la matriz
+sumatorio <- sum(valor.absoluto)
+# Dividir por el numero total de elementos N (25)
+error.opcion1 <- sumatorio / 25
+error.opcion2 <- mean(valor.absoluto)
+
+print(paste("El valor del error de la opcion 1 es de ", error.opcion1))
+print(paste("El valor del error de la opcion 2 es de ", error.opcion2))
+
+error.opcion1.enlinea <- sum(abs(resultado - matriz.identidad)) / 25
+error.opcion2.enlinea <- mean(abs(resultado - matriz.identidad))
+
+print(paste("El valor del error de la opcion 1 en linea es de ", error.opcion1.enlinea))
+print(paste("El valor del error de la opcion 2 en linea es de ", error.opcion2.enlinea))
+```
+
+#### **Bibliografía:**
+
+- https://www.rdocumentation.org/packages/base/versions/3.6.2
+- https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/identical
+- https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/rep
+- https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/diag
+- https://www.rdocumentation.org/packages/SparkR/versions/2.1.2/topics/abs
+- https://r-coder.com/matrices-r/?utm_content=cmp-true
+- https://rstudio-pubs-static.s3.amazonaws.com/561295_15558c4800f542d3a268a3dd07fc69dc.html#:~:text=Para%20imprimir%20texto%20en%20pantalla,comando%20sprintf()%20y%20%25s%20.
